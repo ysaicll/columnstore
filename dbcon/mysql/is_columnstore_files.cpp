@@ -201,11 +201,15 @@ static int is_columnstore_files_plugin_init(void *p)
     schema->fill_table = is_columnstore_files_fill;
     return 0;
 }
+static int is_columnstore_files_plugin_deinit(void *p)
+{
+    return 0;
+}
 
 static struct st_mysql_information_schema is_columnstore_files_plugin_version =
 { MYSQL_INFORMATION_SCHEMA_INTERFACE_VERSION };
 
-maria_declare_plugin(is_columnstore_files_plugin)
+mysql_declare_plugin(is_columnstore_files_plugin)
 {
     MYSQL_INFORMATION_SCHEMA_PLUGIN,
     &is_columnstore_files_plugin_version,
@@ -214,12 +218,11 @@ maria_declare_plugin(is_columnstore_files_plugin)
     "An information schema plugin to list ColumnStore filess",
     PLUGIN_LICENSE_GPL,
     is_columnstore_files_plugin_init,
-    //is_columnstore_files_plugin_deinit,
+    is_columnstore_files_plugin_deinit,
+    0x0001,
     NULL,
-    0x0100,
     NULL,
     NULL,
-    "1.0",
-    MariaDB_PLUGIN_MATURITY_STABLE
+    0
 }
-maria_declare_plugin_end;
+mysql_declare_plugin_end;

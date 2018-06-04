@@ -60,7 +60,7 @@ static int is_columnstore_columns_fill(THD *thd, TABLE_LIST *tables, COND *cond)
     TABLE *table = tables->table;
 
     boost::shared_ptr<execplan::CalpontSystemCatalog> systemCatalogPtr =
-        execplan::CalpontSystemCatalog::makeCalpontSystemCatalog(execplan::CalpontSystemCatalog::idb_tid2sid(thd->thread_id));
+        execplan::CalpontSystemCatalog::makeCalpontSystemCatalog(execplan::CalpontSystemCatalog::idb_tid2sid(thd->thread_id()));
 
     const std::vector< std::pair<execplan::CalpontSystemCatalog::OID, execplan::CalpontSystemCatalog::TableName> > catalog_tables
         = systemCatalogPtr->getTables();
@@ -163,11 +163,15 @@ static int is_columnstore_columns_plugin_init(void *p)
     schema->fill_table = is_columnstore_columns_fill;
     return 0;
 }
+static int is_columnstore_columns_plugin_deinit(void *p)
+{
+    return 0;
+}
 
 static struct st_mysql_information_schema is_columnstore_columns_plugin_version =
 { MYSQL_INFORMATION_SCHEMA_INTERFACE_VERSION };
 
-maria_declare_plugin(is_columnstore_columns_plugin)
+mysql_declare_plugin(is_columnstore_columns_plugin)
 {
     MYSQL_INFORMATION_SCHEMA_PLUGIN,
     &is_columnstore_columns_plugin_version,
@@ -176,14 +180,13 @@ maria_declare_plugin(is_columnstore_columns_plugin)
     "An information schema plugin to list ColumnStore columns",
     PLUGIN_LICENSE_GPL,
     is_columnstore_columns_plugin_init,
-    //is_columnstore_tables_plugin_deinit,
+    is_columnstore_columns_plugin_deinit,
+    0x0001,
     NULL,
-    0x0100,
     NULL,
     NULL,
-    "1.0",
-    MariaDB_PLUGIN_MATURITY_STABLE
+    0
 }
-maria_declare_plugin_end;
+mysql_declare_plugin_end;
 
 

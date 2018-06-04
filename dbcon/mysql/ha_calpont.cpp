@@ -109,7 +109,6 @@
 
 #include "ha_calpont.h"
 #include "columnstoreversion.h"
-
 #define NEED_CALPONT_EXTERNS
 #include "ha_calpont_impl.h"
 
@@ -165,21 +164,19 @@ fprintf(stderr, "calpont_discover()\n");
 #endif
 
   uchar* frm_data = NULL;
-  size_t frm_len = 0;
-  int error = 0;
+  //size_t frm_len = 0;
+  //int error = 0;
 
   if (!ha_calpont_impl_discover_existence(share->db.str, share->table_name.str))
       DBUG_RETURN(HA_ERR_NO_SUCH_TABLE);
 
-  error = share->read_frm_image((const uchar**)&frm_data, &frm_len);
-
-  if (error)
+  //error = share->read_frm_image((const uchar**)&frm_data, &frm_len);
+    
+  if (HA_ERR_NO_SUCH_TABLE)
     DBUG_RETURN(HA_ERR_NO_SUCH_TABLE);
 
-  my_errno= share->init_from_binary_frm_image(thd, 1, frm_data, frm_len);
-
+  //my_errno= share->init_from_binary_frm_image(thd, 1, frm_data, frm_len);
   my_free(frm_data);
-  DBUG_RETURN(my_errno);
 }
 
 int calpont_discover_existence(handlerton *hton, const char *db,
@@ -208,7 +205,7 @@ static int columnstore_init_func(void *p)
   (void) pthread_mutex_init(&calpont_mutex,MY_MUTEX_INIT_FAST);
 #endif
   (void) my_hash_init(&calpont_open_tables,system_charset_info,32,0,0,
-                   (my_hash_get_key) calpont_get_key,0,0);
+                   (my_hash_get_key) calpont_get_key,0,0,0);
 
   calpont_hton->state=   SHOW_OPTION_YES;
   calpont_hton->create=  calpont_create_handler;
@@ -907,9 +904,10 @@ int ha_calpont::delete_all_rows()
 int ha_calpont::external_lock(THD *thd, int lock_type)
 {
   DBUG_ENTER("ha_calpont::external_lock");
-  //@Bug 2526 Only register the transaction when autocommit is off
+  //@Bug 2526 Only register the transaction when autocommit is offi
+  //const ulonglong *magic_todo = 20180521l;
   if ((thd_test_options(thd, OPTION_NOT_AUTOCOMMIT | OPTION_BEGIN)))
-	trans_register_ha( thd, true, calpont_hton);
+	trans_register_ha( thd, true, calpont_hton,NULL);//No idea to get a transaction ID
   int rc = ha_calpont_impl_external_lock(thd, table, lock_type);
   DBUG_RETURN(rc);
 }

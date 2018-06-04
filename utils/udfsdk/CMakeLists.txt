@@ -1,7 +1,10 @@
 
 include_directories( ${ENGINE_COMMON_INCLUDES}
-                     ../../dbcon/mysql )
-                     
+                     ../../dbcon/mysql
+                     ${SERVER_SOURCE_ROOT_DIR}/libbinlogevents/export
+                     ${SERVER_SOURCE_ROOT_DIR}/regex
+                     ${SERVER_SOURCE_ROOT_DIR}/libbinlogevents/include 
+                     ${SERVER_BUILD_INCLUDE_DIR}/../libbinlogevents/include)
 ########### next target ###############
 
 set(udfsdk_LIB_SRCS udfsdk.cpp mcsv1_udaf.cpp allnull.cpp ssq.cpp median.cpp avg_mode.cpp)

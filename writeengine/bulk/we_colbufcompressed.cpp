@@ -46,7 +46,7 @@
 using namespace idbdatafile;
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 namespace WriteEngine {
 
@@ -64,7 +64,7 @@ ColumnBufferCompressed::ColumnBufferCompressed( ColumnInfo* pColInfo,
         fFlushedStartHwmChunk(false)
 {
     fUserPaddingBytes = Config::getNumCompressedPadBlks() * BYTE_PER_BLOCK;
-    fCompressor = new compress::IDBCompressInterface( fUserPaddingBytes );
+    fCompressor = new icompress::IDBCompressInterface( fUserPaddingBytes );
 }
 
 //------------------------------------------------------------------------------

@@ -65,7 +65,7 @@ ReturnedColumn* nullOnError(gp_walk_info& gwi)
 	}
 	return NULL;
 }
-
+/*
 WF_FRAME frame(Window_frame_bound::Bound_precedence_type bound, Item* offset)
 {
 	switch (bound)
@@ -85,7 +85,7 @@ WF_FRAME frame(Window_frame_bound::Bound_precedence_type bound, Item* offset)
 	default:
 		return WF_UNKNOWN;
 	}
-}
+}*/
 ReturnedColumn* buildBoundExp(WF_Boundary& bound, SRCP& order, gp_walk_info& gwi)
 {
 	if (!(gwi.thd->infinidb_vtable.cal_conn_info))
@@ -189,7 +189,7 @@ string ConvertFuncName(Item_sum* item)
     switch (item->sum_func())
     {
     case Item_sum::COUNT_FUNC:
-        if (!item->arguments()[0]->name)
+        if (!item->idb_arguments()[0]->name)
             return "COUNT(*)";
         return "COUNT";
         break;
@@ -297,9 +297,9 @@ ReturnedColumn* buildWindowFunctionColumn(Item* item, gp_walk_info& gwi, bool& n
 	SRCP srcp;
     // arguments
     vector<SRCP> funcParms;
-    for (uint32_t i = 0; i < item_sum->argument_count(); i++)
+    for (uint32_t i = 0; i < item_sum->idb_argument_count(); i++)
     {
-        srcp.reset(buildReturnedColumn((item_sum->arguments()[i]), gwi, nonSupport));
+        srcp.reset(buildReturnedColumn((item_sum->idb_arguments()[i]), gwi, nonSupport));
         if (!srcp)
             return nullOnError(gwi);
         funcParms.push_back(srcp);

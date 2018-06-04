@@ -482,8 +482,8 @@ private:
     int                 expandAbbrevColumnChunk( IDBDataFile* pFile,
                             uint64_t   emptyVal,
                             int   colWidth,
-                            const compress::CompChunkPtr& chunkInPtr,
-                            compress::CompChunkPtr& chunkOutPt);
+                            const icompress::CompChunkPtr& chunkInPtr,
+                            icompress::CompChunkPtr& chunkOutPt);
 
     int                 initAbbrevCompColumnExtent( IDBDataFile* pFile,
                             uint16_t dbRoot,

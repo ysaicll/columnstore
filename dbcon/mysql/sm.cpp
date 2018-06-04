@@ -20,7 +20,7 @@
  *
  ***********************************************************************/
 
-#include <mysql.h>
+//#include <mysql.h>
 #include <my_sys.h>
 #include <errmsg.h>
 #include <sql_common.h>
@@ -493,14 +493,15 @@ MYSQL_RES* mysql_use_result(MYSQL *mysql)
     set_mysql_error(mysql, CR_COMMANDS_OUT_OF_SYNC, unknown_sqlstate);
     DBUG_RETURN(0);
   }
-  if (!(result=(MYSQL_RES*) my_malloc(sizeof(*result)+
+  if (!(result=(MYSQL_RES*) my_malloc(key_memory_max_alloca,
+                                      sizeof(*result)+
 				      sizeof(ulong)*mysql->field_count,
 				      MYF(MY_WME | MY_ZEROFILL))))
     DBUG_RETURN(0);
   result->lengths=(ulong*) (result+1);
   result->methods= mysql->methods;
   if (!(result->row=(MYSQL_ROW)
-	my_malloc(sizeof(result->row[0])*(mysql->field_count+1), MYF(MY_WME))))
+	my_malloc(key_memory_max_alloca,sizeof(result->row[0])*(mysql->field_count+1), MYF(MY_WME))))
   {					/* Ptrs: to one row */
     my_free(result);
     DBUG_RETURN(0);

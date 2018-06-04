@@ -102,9 +102,9 @@ class ColumnBufferCompressed : public ColumnBuffer {
                                                 // should always be 4MB, unless
                                                 // working with abbrev extent.
     size_t               fNumBytes;             // num Bytes in comp buffer
-    compress::IDBCompressInterface*
+    icompress::IDBCompressInterface*
                          fCompressor;           // data compression object
-    compress::CompChunkPtrList
+    icompress::CompChunkPtrList
                          fChunkPtrs;            // col file header information
     bool                 fPreLoadHWMChunk;      // preload 1st HWM chunk only
     unsigned int         fUserPaddingBytes;     // compressed chunk padding

@@ -36,7 +36,7 @@ using namespace messageqcpp;
 #include "we_fileop.h"
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "IDBFileSystem.h"
 #include "IDBPolicy.h"

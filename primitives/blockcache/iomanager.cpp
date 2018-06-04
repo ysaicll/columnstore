@@ -96,7 +96,7 @@ using namespace logging;
 #include "liboamcpp.h"
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "IDBDataFile.h"
 #include "IDBPolicy.h"

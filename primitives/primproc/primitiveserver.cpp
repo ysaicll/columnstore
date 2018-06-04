@@ -83,7 +83,7 @@ using namespace primitives;
 #include "exceptclasses.h"
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "IDBDataFile.h"
 #include "IDBPolicy.h"

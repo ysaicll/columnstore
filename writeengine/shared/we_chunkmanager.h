@@ -64,11 +64,11 @@ namespace WriteEngine
 // forward reference
 class FileOp;
 
-const int UNCOMPRESSED_CHUNK_SIZE = compress::IDBCompressInterface::UNCOMPRESSED_INBUF_LEN;
-const int COMPRESSED_FILE_HEADER_UNIT = compress::IDBCompressInterface::HDR_BUF_LEN;
+const int UNCOMPRESSED_CHUNK_SIZE = icompress::IDBCompressInterface::UNCOMPRESSED_INBUF_LEN;
+const int COMPRESSED_FILE_HEADER_UNIT = icompress::IDBCompressInterface::HDR_BUF_LEN;
 
 // assume UNCOMPRESSED_CHUNK_SIZE > 0xBFFF (49151), 8 * 1024 bytes padding
-const int COMPRESSED_CHUNK_SIZE = compress::IDBCompressInterface::maxCompressedSize(UNCOMPRESSED_CHUNK_SIZE) + 64+3 + 8*1024;
+const int COMPRESSED_CHUNK_SIZE = icompress::IDBCompressInterface::maxCompressedSize(UNCOMPRESSED_CHUNK_SIZE) + 64+3 + 8*1024;
 
 const int BLOCKS_IN_CHUNK = UNCOMPRESSED_CHUNK_SIZE / BYTE_PER_BLOCK;
 const int MAXOFFSET_PER_CHUNK = 511*BYTE_PER_BLOCK;
@@ -345,7 +345,7 @@ protected:
     bool                                        fIsInsert;
     bool                                        fIsHdfs;
     FileOp*                                     fFileOp;
-    compress::IDBCompressInterface              fCompressor;
+    icompress::IDBCompressInterface              fCompressor;
     logging::Logger*                            fSysLogger;
     TxnID                                       fTransId;
     int                                         fLocalModuleId;

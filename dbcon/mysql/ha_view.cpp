@@ -102,7 +102,7 @@ void View::transform()
 				gwi.tableMap[tn] = make_pair(0, table_ptr);
 				gwi.thd->infinidb_vtable.isUnion = true; //by-pass the 2nd pass of rnd_init
 			}
-			else if (table_ptr->view)
+/* TODO Infinid		else if (table_ptr->view)
 			{
 				// for nested view, the view name is vout.vin... format
 				CalpontSystemCatalog::TableAliasName tn = make_aliasview(table_ptr->db, table_ptr->table_name, table_ptr->alias, viewName);
@@ -112,7 +112,7 @@ void View::transform()
 				gwi.viewList.push_back(view);
 				view->transform();
 			}
-			else
+*/			else
 			{
 				// check foreign engine tables
 				bool infiniDB = (table_ptr->table ? isInfiniDB(table_ptr->table) : true);

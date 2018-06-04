@@ -34,7 +34,7 @@
 #include "IDBDataFile.h"
 #include "IDBPolicy.h"
 using namespace idbdatafile;
-using namespace compress;
+using namespace icompress;
 using namespace execplan;
 
 namespace

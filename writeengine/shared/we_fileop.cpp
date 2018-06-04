@@ -47,7 +47,7 @@ using namespace std;
 #include "we_simplesyslog.h"
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "messagelog.h"
 using namespace logging;
@@ -626,7 +626,7 @@ int FileOp::extendFile(
         // @bug 5349: check that new extent's fbo is not past current EOF
         if (m_compressionType)
         {
-            char hdrsIn[ compress::IDBCompressInterface::HDR_BUF_LEN * 2 ];
+            char hdrsIn[ icompress::IDBCompressInterface::HDR_BUF_LEN * 2 ];
             RETURN_ON_ERROR( readHeaders(pFile, hdrsIn) );
 
             IDBCompressInterface compressor;

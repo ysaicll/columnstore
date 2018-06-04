@@ -34,7 +34,7 @@
 #include "we_log.h"
 #include "we_bulkrollbackmgr.h"
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 using namespace execplan;
 #include "IDBDataFile.h"
 #include "IDBFileSystem.h"

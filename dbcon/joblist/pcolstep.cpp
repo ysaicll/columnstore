@@ -146,7 +146,7 @@ pColStep::pColStep(
 	if (fOid < 1000)
 		throw runtime_error("pColStep: invalid column");
 
-	compress::IDBCompressInterface cmpif;
+	icompress::IDBCompressInterface cmpif;
 	if (!cmpif.isCompressionAvail(fColType.compressionType))
 	{
 		ostringstream oss;

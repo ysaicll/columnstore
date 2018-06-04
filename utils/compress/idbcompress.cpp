@@ -40,7 +40,7 @@ const uint64_t MAGIC_NUMBER = 0xfdc119a384d0778eULL;
 const uint64_t VERSION_NUM1 = 1;
 const uint64_t VERSION_NUM2 = 2;
 const int      COMPRESSED_CHUNK_INCREMENT_SIZE = 8192;
-const int      PTR_SECTION_OFFSET = compress::IDBCompressInterface::HDR_BUF_LEN;
+const int      PTR_SECTION_OFFSET = icompress::IDBCompressInterface::HDR_BUF_LEN;
 
 // version 1.1 of the chunk data has a short header
 // QuickLZ compressed data never has the high bit set on the first byte
@@ -76,7 +76,7 @@ struct CompressedDBFileHeader
 union CompressedDBFileHeaderBlock
 {
 	CompressedDBFileHeader fHeader;
-	char fDummy[compress::IDBCompressInterface::HDR_BUF_LEN];
+	char fDummy[icompress::IDBCompressInterface::HDR_BUF_LEN];
 };
 
 void initCompressedDBFileHeader(void* hdrBuf, int compressionType, int hdrSize)
@@ -103,7 +103,7 @@ void log(const string &s)
 } // namespace
 
 
-namespace compress
+namespace icompress
 {
 #ifndef SKIP_IDB_COMPRESSION
 

@@ -66,9 +66,15 @@ template <class T> bool isnan(T);
 #include "sql_table.h"
 #include "sql_select.h"
 #include "mysqld_error.h"
-#include "item_windowfunc.h"
-#include "sql_cte.h"
-
+//#include "item_windowfunc.h"
+//#include "sql_cte.h"
+#include "sql_lex.h"
+#include "sql_delete.h"
+#include "sql_optimizer.h"
+#include "item.h"
+#include "item_sum.h"
+#include "item_timefunc.h"
+#include "sql_update.h"
 // Now clean up the pollution as best we can...
 #undef min
 #undef max
@@ -96,10 +102,10 @@ template <class T> bool isnan(T);
 #undef set_bits
 
 namespace {
-inline char* idb_mysql_query_str(THD* thd)
+inline const char* idb_mysql_query_str(THD* thd)
 {
 #if MYSQL_VERSION_ID >= 50172
-	return thd->query();
+	return thd->query().str;
 #else
 	return thd->query;
 #endif

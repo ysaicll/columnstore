@@ -276,7 +276,7 @@ void sendn(int fd, const char* p, size_t wanted)
 
 }
 
-namespace compress
+namespace icompress
 {
 
 namespace v1

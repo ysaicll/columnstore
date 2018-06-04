@@ -1630,7 +1630,7 @@ int ChunkManager::reallocateChunks(CompFileData* fileData)
     // back out the current pointers
     int headerSize = fCompressor.getHdrSize(fileData->fFileHeader.fControlData);
     int ptrSecSize = headerSize - COMPRESSED_FILE_HEADER_UNIT;
-    compress::CompChunkPtrList origPtrs;
+    icompress::CompChunkPtrList origPtrs;
     if (fCompressor.getPtrList(fileData->fFileHeader.fPtrSection, ptrSecSize, origPtrs) != 0)
     {
         ostringstream oss;
@@ -2096,7 +2096,7 @@ int ChunkManager::verifyChunksAfterRealloc(CompFileData* fileData)
     }
 
     // get pointer list
-    compress::CompChunkPtrList ptrs;
+    icompress::CompChunkPtrList ptrs;
     if (fCompressor.getPtrList(fileData->fFileHeader.fPtrSection, ptrSecSize, ptrs) != 0)
     {
         ostringstream oss;
@@ -2437,7 +2437,7 @@ int ChunkManager::checkFixLastDictChunk(const FID& fid,
 		int ptrSecSize = headerSize - COMPRESSED_FILE_HEADER_UNIT;
 
 		// get pointer list
-		compress::CompChunkPtrList ptrs;
+		icompress::CompChunkPtrList ptrs;
 		if (fCompressor.getPtrList(mit->second->fFileHeader.fPtrSection, ptrSecSize, ptrs) != 0)
 		{
 			ostringstream oss;

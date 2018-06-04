@@ -31,7 +31,7 @@
 #include "we_tableinfo.h"
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "IDBFileSystem.h"
 
@@ -107,7 +107,7 @@ int ColumnInfoCompressed::closeColumnFile(bool bCompletingExtent,bool bAbort)
 //------------------------------------------------------------------------------
 int ColumnInfoCompressed::setupInitialColumnFile( HWM oldHwm, HWM hwm )
 {
-    char hdr[ compress::IDBCompressInterface::HDR_BUF_LEN * 2 ];
+    char hdr[ icompress::IDBCompressInterface::HDR_BUF_LEN * 2 ];
     RETURN_ON_ERROR( colOp->readHeaders(curCol.dataFile.pFile, hdr) );
 
     // Initialize the output buffer manager for the column.

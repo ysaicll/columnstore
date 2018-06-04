@@ -1309,7 +1309,7 @@ bool buildPredicateItem(Item_func* ifp, gp_walk_info* gwip)
 			if (!buf.ptr())
 			{
 				ostringstream oss;
-				oss << "Unknown user variable: " << udf->name.str;
+				oss << "Unknown user variable: " << udf->idb_name.str;
 				gwip->parseErrorText = oss.str();
 				gwip->fatalParseError = true;
 				return false;
@@ -2027,7 +2027,7 @@ void setError(THD* thd, uint32_t errcode, string errmsg)
 	thd->get_stmt_da()->set_overwrite_status(true);
 	if (errmsg.empty())
 		errmsg = "Unknown error";
-	if (errcode < ER_ERROR_FIRST || errcode > ER_ERROR_LAST)
+	if (errcode < 1000 || errcode >  3635)
 	{
 		errcode = ER_UNKNOWN_ERROR;
 	}
@@ -2184,7 +2184,7 @@ SimpleColumn* getSmallestColumn(boost::shared_ptr<CalpontSystemCatalog> csc,
 		// get the first column to project. @todo optimization to get the smallest one for foreign engine.
 		Field *field = *(table->field);
 		SimpleColumn* sc = new SimpleColumn(table->s->db.str, table->s->table_name.str, field->field_name, tan.fIsInfiniDB, gwi.sessionid);
-		string alias(table->alias.ptr());
+		string alias(table->alias);
 		sc->tableAlias(lower(alias));
 		sc->isInfiniDB(false);
 		sc->resultType(fieldType_MysqlToIDB(field));
@@ -2484,9 +2484,9 @@ ReturnedColumn* buildReturnedColumn(Item* item, gp_walk_info& gwi, bool& nonSupp
 				return buildReturnedColumn(*(((Item_ref*)(*(ref->ref)))->ref), gwi, nonSupport);
             case Item::FUNC_ITEM:
 				return buildFunctionColumn((Item_func*)(*(ref->ref)), gwi, nonSupport);
-		    case Item::WINDOW_FUNC_ITEM:
+		   /* case Item::WINDOW_FUNC_ITEM:
     			return buildWindowFunctionColumn(*(ref->ref), gwi, nonSupport);
-            default:
+          */  default:
 				gwi.fatalParseError = true;
 				gwi.parseErrorText = "Unknown REF item";
 				break;
@@ -2529,10 +2529,10 @@ ReturnedColumn* buildReturnedColumn(Item* item, gp_walk_info& gwi, bool& nonSupp
 			rc = new ConstantColumn(valStr);
 			break;
 		}
-		case Item::WINDOW_FUNC_ITEM:
+	/*	case Item::WINDOW_FUNC_ITEM:
 		{
 			return buildWindowFunctionColumn(item, gwi, nonSupport);
-		}
+		}*/
 #if INTERVAL_ITEM
 		case Item::INTERVAL_ITEM:
 		{
@@ -3533,7 +3533,7 @@ ReturnedColumn* buildAggregateColumn(Item* item, gp_walk_info& gwi)
 
 	// N.B. argument_count() is the # of formal parms to the agg fcn. InifniDB only supports 1 argument
 	// TODO: Support more than one parm
-	if (isp->argument_count() != 1 && isp->sum_func() != Item_sum::GROUP_CONCAT_FUNC
+	if (isp->idb_argument_count() != 1 && isp->sum_func() != Item_sum::GROUP_CONCAT_FUNC
 		&& isp->sum_func() != Item_sum::UDF_SUM_FUNC)
 	{
 		gwi.fatalParseError = true;
@@ -3626,7 +3626,7 @@ ReturnedColumn* buildAggregateColumn(Item* item, gp_walk_info& gwi)
 	}
 	else
 	{
-		for (uint32_t i = 0; i < isp->argument_count(); i++)
+		for (uint32_t i = 0; i < isp->idb_argument_count(); i++)
 		{
 			Item* sfitemp = sfitempp[i];
 			Item::Type sfitype = sfitemp->type();
@@ -4558,7 +4558,7 @@ void gp_walk(const Item *item, void *arg)
 			gwip->rcWorkStack.push(rowCol);
 			break;
 		}
-		case Item::EXPR_CACHE_ITEM:
+	/*	case Item::EXPR_CACHE_ITEM:
 		{
 			((Item_cache_wrapper*)item)->get_orig_item()->traverse_cond(gp_walk, arg, Item::POSTFIX);
 			break;
@@ -4578,7 +4578,7 @@ void gp_walk(const Item *item, void *arg)
 				gwip->rcWorkStack.push(af);
 			break;
 		}
-		case Item::COPY_STR_ITEM:
+	*/	case Item::COPY_STR_ITEM:
 			printf("********** received COPY_STR_ITEM *********\n");
 			break;
 		case Item::FIELD_AVG_ITEM:
@@ -4656,8 +4656,8 @@ void parse_item (Item *item, vector<Item_field*>& field_vec, bool& hasNonSupport
 			//hasAggColumn = true;
 			parseInfo |= AGG_BIT;
 			Item_sum* isp = reinterpret_cast<Item_sum*>(item);
-			Item** sfitempp = isp->arguments();
-			for (uint32_t i = 0; i < isp->argument_count(); i++)
+			Item** sfitempp = isp->idb_arguments();
+			for (uint32_t i = 0; i < isp->idb_argument_count(); i++)
 				parse_item(sfitempp[i], field_vec, hasNonSupportItem, parseInfo);
 			break;
 		}
@@ -4693,15 +4693,15 @@ void parse_item (Item *item, vector<Item_field*>& field_vec, bool& hasNonSupport
 				{
 					parseInfo |= AGG_BIT;
 					Item_sum* isp = reinterpret_cast<Item_sum*>(*(ref->ref));
-					Item** sfitempp = isp->arguments();
+					Item** sfitempp = isp->idb_arguments();
 					// special handling for count(*). This should not be treated as constant.
-					if (isp->argument_count() == 1 &&
+					if (isp->idb_argument_count() == 1 &&
 						  (sfitempp[0]->type() == Item::INT_ITEM ||
 						   sfitempp[0]->type() == Item::STRING_ITEM ||
 						   sfitempp[0]->type() == Item::REAL_ITEM	||
 						   sfitempp[0]->type() == Item::DECIMAL_ITEM))
 						field_vec.push_back((Item_field*)item); //dummy
-					for (uint32_t i = 0; i < isp->argument_count(); i++)
+					for (uint32_t i = 0; i < isp->idb_argument_count(); i++)
 						parse_item(sfitempp[i], field_vec, hasNonSupportItem, parseInfo);
 					break;
 				}
@@ -4893,9 +4893,9 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 			if (string(table_ptr->table_name).find("$vtable") != string::npos)
 				continue;
 
-			// Until we handle recursive cte:
+			// Until we handle recursive cte:InfiniDB sql_cte.h ??
 			// Checking here ensures we catch all with clauses in the query.
-			if (table_ptr->is_recursive_with_table())
+		/*	if (table_ptr->is_recursive_with_table())
 			{
 				gwi.fatalParseError = true;
 				gwi.parseErrorText = "Recursive CTE";
@@ -4903,7 +4903,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				return ER_CHECK_NOT_IMPLEMENTED;
 			}
 
-			string viewName = getViewName(table_ptr);
+		*/	string viewName = getViewName(table_ptr);
 
 			// @todo process from subquery
 			if (table_ptr->derived)
@@ -4932,7 +4932,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				gwi.tableMap[tan] = make_pair(0, table_ptr);
 				gwi.thd->infinidb_vtable.isUnion = true; //by-pass the 2nd pass of rnd_init
 			}
-			else if (table_ptr->view)
+/*			else if (table_ptr->view)
 			{
 				View *view = new View(table_ptr->view->select_lex, &gwi);
 				CalpontSystemCatalog::TableAliasName tn = make_aliastable(table_ptr->db, table_ptr->table_name, table_ptr->alias);
@@ -4940,7 +4940,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				gwi.viewList.push_back(view);
 				view->transform();
 			}
-			else
+*/			else
 			{
 				// check foreign engine tables
 				bool infiniDB = (table_ptr->table ? isInfiniDB(table_ptr->table) : true);
@@ -5670,7 +5670,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				setError(gwi.thd, ER_CHECK_NOT_IMPLEMENTED, gwi.parseErrorText, gwi);
 				return ER_CHECK_NOT_IMPLEMENTED;
 			}
-			case Item::WINDOW_FUNC_ITEM:
+		/*	case Item::WINDOW_FUNC_ITEM:
 			{
 				SRCP srcp(buildWindowFunctionColumn(item, gwi, gwi.fatalParseError));
 				if (!srcp || gwi.fatalParseError)
@@ -5683,7 +5683,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				gwi.returnedCols.push_back(srcp);
 				break;
 			}
-			default:
+		*/	default:
 			{
 				break;
 			}
@@ -6491,7 +6491,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 		if (!isUnion && !gwi.hasWindowFunc && gwi.subSelectType == CalpontSelectExecutionPlan::MAIN_SELECT)
 		{
 			std::ostringstream vtb;
-		  vtb << "infinidb_vtable.$vtable_" << gwi.thd->thread_id;
+		  vtb << "infinidb_vtable.$vtable_" << gwi.thd->thread_id();
 		  //vtb << "$vtable_" << gwi.thd->thread_id;
 			// re-construct the select query and redo phase 1
 			if (redo)
@@ -6577,7 +6577,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 				}
 
 
-				gwi.thd->infinidb_vtable.create_vtable_query.free();
+				gwi.thd->infinidb_vtable.create_vtable_query.mem_free();
 				gwi.thd->infinidb_vtable.create_vtable_query.append(create_query.c_str(), create_query.length());
 				gwi.thd->infinidb_vtable.vtable_state = THD::INFINIDB_REDO_PHASE1; // redo phase 1
 
@@ -6826,7 +6826,7 @@ int getSelectPlan(gp_walk_info& gwi, SELECT_LEX& select_lex, SCSEP& csep, bool i
 			}
 		}
 
-		gwi.thd->infinidb_vtable.select_vtable_query.free();
+		gwi.thd->infinidb_vtable.select_vtable_query.mem_free();
 		gwi.thd->infinidb_vtable.select_vtable_query.append(select_query.c_str(), select_query.length());
 
 		// We don't currently support limit with correlated subquery
@@ -6920,10 +6920,10 @@ int cp_get_plan(THD* thd, SCSEP& csep)
 	LEX* lex = thd->lex;
 	idbassert(lex != 0);
 
-	SELECT_LEX select_lex = lex->select_lex;
+	SELECT_LEX *select_lex = lex->select_lex;
 	gp_walk_info gwi;
 	gwi.thd = thd;
-	int status = getSelectPlan(gwi, select_lex, csep);
+	int status = getSelectPlan(gwi, *select_lex, csep);
 	if (status > 0)
 		return ER_INTERNAL_ERROR;
 	else if (status < 0)
@@ -6958,7 +6958,7 @@ int cp_get_table_plan(THD* thd, SCSEP& csep, cal_table_info& ti)
 		if (bitmap_is_set(read_set, field->field_index))
 		{
 			SimpleColumn* sc = new SimpleColumn(table->s->db.str, table->s->table_name.str, field->field_name, sessionID);
-			string alias(table->alias.c_ptr());
+			string alias(table->alias);
 			sc->tableAlias(lower(alias));
 			assert (sc);
 			boost::shared_ptr<SimpleColumn> spsc(sc);
@@ -6970,7 +6970,7 @@ int cp_get_table_plan(THD* thd, SCSEP& csep, cal_table_info& ti)
 	if (gwi->columnMap.empty())
 	{
 		CalpontSystemCatalog::TableName tn = make_table(table->s->db.str, table->s->table_name.str);
-		CalpontSystemCatalog::TableAliasName tan = make_aliastable(table->s->db.str, table->s->table_name.str, table->alias.c_ptr());
+		CalpontSystemCatalog::TableAliasName tan = make_aliastable(table->s->db.str, table->s->table_name.str, table->alias);
 		SimpleColumn *sc = getSmallestColumn(csc, tn, tan, table, *gwi);
 		SRCP srcp(sc);
 		gwi->columnMap.insert(CalpontSelectExecutionPlan::ColumnMap::value_type(sc->columnName(), srcp));
@@ -7012,7 +7012,7 @@ int cp_get_table_plan(THD* thd, SCSEP& csep, cal_table_info& ti)
 	csep->returnedCols(gwi->returnedCols);
 	csep->columnMap(gwi->columnMap);
 	CalpontSelectExecutionPlan::TableList tblist;
-	tblist.push_back(make_aliastable(table->s->db.str, table->s->table_name.str, table->alias.c_ptr()));
+	tblist.push_back(make_aliastable(table->s->db.str, table->s->table_name.str, table->alias));
 	csep->tableList(tblist);
 
 	// @bug 3321. Set max number of blocks in a dictionary file to be scanned for filtering

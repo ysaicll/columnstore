@@ -55,7 +55,7 @@
 
 using namespace std;
 using namespace boost;
-using namespace compress;
+using namespace icompress;
 
 namespace messageqcpp
 {

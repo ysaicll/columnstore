@@ -148,7 +148,7 @@ class JoinPartition
 
 		/* Compression support */
 		bool useCompression;
-		compress::IDBCompressInterface compressor;
+		icompress::IDBCompressInterface compressor;
 		/* TBD: do the reading/writing in one thread, compression/decompression in another */
 
 		/* Some stats for reporting */

@@ -1,5 +1,6 @@
 
-include_directories( ${ENGINE_COMMON_INCLUDES} )
+include_directories( ${ENGINE_COMMON_INCLUDES}
+                     ${SERVER_SOURCE_ROOT_DIR}/libbinlogevents/export )
 
 
 ########### next target ###############

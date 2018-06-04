@@ -331,7 +331,7 @@ int BulkLoad::loadJobInfo(
     }
 
     // Validate that specified compression type is available
-    compress::IDBCompressInterface compressor;
+    icompress::IDBCompressInterface compressor;
     for (unsigned kT=0; kT<curJob.jobTableList.size(); kT++)
     {
         for (unsigned kC=0; kC<curJob.jobTableList[kT].colList.size(); kC++)

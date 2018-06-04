@@ -140,15 +140,15 @@ private:
                                 std::string& errMsg );
     int loadColumnHdrPtrs    (  IDBDataFile* pFile,
                                 char*       hdrs,
-                                compress::CompChunkPtrList& chunkPtrs,
+                                icompress::CompChunkPtrList& chunkPtrs,
                                 std::string& errMsg) const;
     int loadDctnryHdrPtrs    (  IDBDataFile* pFile,
                                 char*       controlHdr,
-                                compress::CompChunkPtrList& chunkPtrs,
+                                icompress::CompChunkPtrList& chunkPtrs,
                                 uint64_t&   ptrHdrSize,
                                 std::string& errMsg ) const;
 
-    compress::IDBCompressInterface fCompressor;
+    icompress::IDBCompressInterface fCompressor;
 };
 
 } //end of namespace

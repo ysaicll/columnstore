@@ -239,7 +239,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
 {
 	int rc = 0;
 
-	ulong sessionID = tid2sid(thd->thread_id);
+	ulong sessionID = tid2sid(thd->thread_id());
 	
 	CalpontDMLPackage* pDMLPackage; 
 	//@Bug 2721 and 2722. Log the statement before issuing commit/rollback
@@ -285,7 +285,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
 		if ( bytestream.length() == 0 )
         {
             rc = 1;
-			thd->killed = KILL_QUERY;
+			thd->killed = THD::KILL_QUERY;
             thd->get_stmt_da()->set_overwrite_status(true);
 
             thd->raise_error_printf(ER_INTERNAL_ERROR, "Lost connection to DMLProc [1]");
@@ -299,7 +299,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
     catch (runtime_error&)
     {
 		rc =1 ;
-		thd->killed = KILL_QUERY;
+		thd->killed = THD::KILL_QUERY;
         thd->get_stmt_da()->set_overwrite_status(true);
 
         thd->raise_error_printf(ER_INTERNAL_ERROR, "Lost connection to DMLProc [2]");
@@ -307,7 +307,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
     catch (...)
     {
 		rc = 1;
-		thd->killed = KILL_QUERY;
+		thd->killed = THD::KILL_QUERY;
         thd->get_stmt_da()->set_overwrite_status(true);
 
         thd->raise_error_printf(ER_INTERNAL_ERROR, "Caught unknown error");
@@ -316,7 +316,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
 	if (( b !=0 ) && (!thd->get_stmt_da()->is_set()))
 	{
 		rc = 1;
-		thd->killed = KILL_QUERY;
+		thd->killed = THD::KILL_QUERY;
         thd->raise_error_printf(ER_INTERNAL_ERROR, errormsg.c_str());
 	}
 	delete ci.dmlProc;
@@ -327,7 +327,7 @@ int ProcessCommandStatement(THD *thd, string& dmlStatement, cal_connection_info&
 int doProcessInsertValues ( TABLE* table, uint32_t size, cal_connection_info& ci, bool lastBatch = false )
 {
 		THD *thd = current_thd;
-		uint32_t sessionID = tid2sid(thd->thread_id);
+		uint32_t sessionID = tid2sid(thd->thread_id());
 		
 		int rc = 0;
 		
@@ -523,7 +523,7 @@ int doProcessInsertValues ( TABLE* table, uint32_t size, cal_connection_info& ci
             {
     			rc = 0;
             }
-   			push_warning(thd, Sql_condition::WARN_LEVEL_WARN, ER_WARN_DATA_OUT_OF_RANGE, errormsg.c_str());
+   			push_warning(thd, Sql_condition::SL_WARNING, ER_WARN_DATA_OUT_OF_RANGE, errormsg.c_str());
 		}
 		
 		if ( rc != 0 )
@@ -1667,7 +1667,7 @@ int ha_calpont_impl_write_batch_row_(uchar *buf, TABLE* table, cal_impl_if::cal_
  std::string  ha_calpont_impl_viewtablelock( cal_impl_if::cal_connection_info& ci, execplan::CalpontSystemCatalog::TableName& tablename)
  {
 	THD *thd = current_thd;
-	ulong sessionID = tid2sid(thd->thread_id);
+	ulong sessionID = tid2sid(thd->thread_id());
 	CalpontDMLPackage* pDMLPackage; 
 	std::string dmlStatement( "VIEWTABLELOCK" );
 	VendorDMLStatement cmdStmt(dmlStatement, DML_COMMAND, sessionID);
@@ -1732,7 +1732,7 @@ int ha_calpont_impl_write_batch_row_(uchar *buf, TABLE* table, cal_impl_if::cal_
  {
 	execplan::CalpontSystemCatalog::TableName tblName;
 	THD *thd        = current_thd;
-	ulong sessionID = tid2sid(thd->thread_id);
+	ulong sessionID = tid2sid(thd->thread_id());
 	std::string tableLockInfo;
 	BRM::TableLockInfo lockInfo;
 
@@ -1859,7 +1859,7 @@ int ha_calpont_impl_rollback_ (handlerton *hton, THD *thd, bool all, cal_connect
 	{
 		string msg = string("Some non-transactional changed tables couldn't be rolled back");
 	//	cout << "Some non-transactional changed tables couldn't be rolled back" << endl;
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 1196, msg.c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 1196, msg.c_str());
 		return rc;
 	}
 		

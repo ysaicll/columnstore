@@ -33,7 +33,7 @@
 #define EXPORT
 #endif
 
-namespace compress
+namespace icompress
 {
 
 typedef std::pair<uint64_t,uint64_t> CompChunkPtr;

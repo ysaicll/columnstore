@@ -71,7 +71,7 @@ using namespace messageqcpp;
 using namespace config;
 
 #include "idbcompress.h"
-using namespace compress;
+using namespace icompress;
 
 #include "idberrorinfo.h"
 #include "errorids.h"
@@ -888,7 +888,7 @@ int ProcessDDLStatement(string& ddlStatement, string& schema, const string& tabl
 			{
 				compressionType = 2;
 				string errmsg ("The table is created with Columnstore compression type 2 under HDFS." );
-				push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, errmsg.c_str());
+				push_warning(thd, Sql_condition::SL_WARNING, 9999, errmsg.c_str());
 			}
 
 			(createTable->fTableDef->fColumns[i]->fType)->fCompressiontype = compressionType;
@@ -1119,7 +1119,7 @@ int ProcessDDLStatement(string& ddlStatement, string& schema, const string& tabl
 					{
 						compressionType = 2;
 						string errmsg ("The column is created with Columnstore compression type 2 under HDFS." );
-						push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, errmsg.c_str());
+						push_warning(thd, Sql_condition::SL_WARNING, 9999, errmsg.c_str());
 					}
 
 					try {
@@ -1412,7 +1412,7 @@ int ProcessDDLStatement(string& ddlStatement, string& schema, const string& tabl
 					{
 						compressionType = 2;
 						string errmsg ("The column is created with Columnstore compression type 2 under HDFS." );
-						push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, errmsg.c_str());
+						push_warning(thd, Sql_condition::SL_WARNING, 9999, errmsg.c_str());
 					}
 
 
@@ -1532,7 +1532,7 @@ int ProcessDDLStatement(string& ddlStatement, string& schema, const string& tabl
 					{
 						compressionType = 2;
 						string errmsg ("The column is created with Columnstore compression type 2 under HDFS." );
-						push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, errmsg.c_str());
+						push_warning(thd, Sql_condition::SL_WARNING, 9999, errmsg.c_str());
 					}
 
 				}
@@ -1743,7 +1743,7 @@ int ProcessDDLStatement(string& ddlStatement, string& schema, const string& tabl
 	{
 		rc = 0;
 		string errmsg ("Error occured during file deletion. Restart DMLProc or use command tool ddlcleanup to clean up. " );
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, errmsg.c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, errmsg.c_str());
 	}
 	return rc;
 
@@ -1803,7 +1803,7 @@ int ha_calpont_impl_create_(const char *name, TABLE *table_arg, HA_CREATE_INFO *
 #endif
 	THD *thd = current_thd;
 
-	char* query = thd->query();
+	const char* query = thd->query().str;
 	if (!query)
 	{
 		setError(thd, ER_INTERNAL_ERROR, "Attempt to create table, but query is NULL");
@@ -1894,7 +1894,7 @@ int ha_calpont_impl_create_(const char *name, TABLE *table_arg, HA_CREATE_INFO *
 	}
 
 	string emsg;
-	stmt = thd->query();
+	stmt = thd->query().str;
 	stmt += ";";
 	int rc = 0;
 
@@ -1949,7 +1949,7 @@ int ha_calpont_impl_create_(const char *name, TABLE *table_arg, HA_CREATE_INFO *
 	if ((compressiontype ==0) && (useHdfs))
 	{
 		compressiontype = 2;
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, "The table is created with Columnstore compression type 2 under HDFS.");
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, "The table is created with Columnstore compression type 2 under HDFS.");
 	}
 
 	if (compressiontype == 1) compressiontype = 2;
@@ -1964,10 +1964,10 @@ int ha_calpont_impl_create_(const char *name, TABLE *table_arg, HA_CREATE_INFO *
 		return 1;
 	}
 
-	rc = ProcessDDLStatement(stmt, db, tbl, tid2sid(thd->thread_id), emsg, compressiontype, isAnyAutoincreCol, startValue, columnName);
+	rc = ProcessDDLStatement(stmt, db, tbl, tid2sid(thd->thread_id()), emsg, compressiontype, isAnyAutoincreCol, startValue, columnName);
 
 	if (rc != 0) {
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, emsg.c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, emsg.c_str());
 		//Bug 1705 reset the flag if error occurs
 		ci.alterTableState = cal_connection_info::NOT_ALTER;
 		ci.isAlter = false;
@@ -1986,7 +1986,7 @@ int ha_calpont_impl_delete_table_(const char *db, const char *name, cal_connecti
 	THD *thd = current_thd;
 	std::string tbl(name);
 	std::string schema(db);
-	char* query = thd->query();
+	const char* query = thd->query().str;
 	if (!query)
 	{
 		setError(thd, ER_INTERNAL_ERROR, "Attempt to drop table, but query is NULL");
@@ -2025,14 +2025,14 @@ int ha_calpont_impl_delete_table_(const char *db, const char *name, cal_connecti
 	}
 	else
 	{
-		stmt = thd->query();
+		stmt = thd->query().str;
 	}
 	stmt += ";";
-	int rc = ProcessDDLStatement(stmt, schema, tbl, tid2sid(thd->thread_id), emsg);
+	int rc = ProcessDDLStatement(stmt, schema, tbl, tid2sid(thd->thread_id()), emsg);
 //	cout << "ProcessDDLStatement rc=" << rc << endl;
 	if (rc != 0)
 	{
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, emsg.c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, emsg.c_str());
 	}
 	return rc;
 }
@@ -2076,12 +2076,12 @@ int ha_calpont_impl_rename_table_(const char* from, const char* to, cal_connecti
 	string db;
 	if ( fromPair.first.length() !=0 )
 		db = fromPair.first;
-	else if ( thd->db )
-		db = thd->db;
+	else if ( thd->db().str )
+		db = thd->db().str;
 
-	int rc = ProcessDDLStatement(stmt, db, "", tid2sid(thd->thread_id), emsg);
+	int rc = ProcessDDLStatement(stmt, db, "", tid2sid(thd->thread_id()), emsg);
 	if (rc != 0)
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, emsg.c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, emsg.c_str());
 
 	return rc;
 }
@@ -2101,8 +2101,8 @@ long long calonlinealter(UDF_INIT* initid, UDF_ARGS* args,
 	string emsg;
 	THD *thd = current_thd;
 	string db("");
-	if ( thd->db )
-		db = thd->db;
+	if ( thd->db().str )
+		db = thd->db().str;
 
 	int compressiontype = thd->variables.infinidb_compression_type;
 
@@ -2119,9 +2119,9 @@ long long calonlinealter(UDF_INIT* initid, UDF_ARGS* args,
 
 	if (compressiontype == 1) compressiontype = 2;
 	
-	int rc = ProcessDDLStatement(stmt, db, "", tid2sid(thd->thread_id), emsg, compressiontype);
+	int rc = ProcessDDLStatement(stmt, db, "", tid2sid(thd->thread_id()), emsg, compressiontype);
 	if (rc != 0)
-		push_warning(thd, Sql_condition::WARN_LEVEL_ERROR, 9999, emsg.c_str());
+		push_warning(thd, Sql_condition::SL_ERROR, 9999, emsg.c_str());
 
 	return rc;
 }

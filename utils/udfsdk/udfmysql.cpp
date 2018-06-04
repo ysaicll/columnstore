@@ -198,7 +198,7 @@ my_bool allnull_init(UDF_INIT* initid, UDF_ARGS* args, char* message)
 
 	if (!(data = (struct allnull_data*) malloc(sizeof(struct allnull_data))))
 	{
-		strmov(message,"Couldn't allocate memory");
+		my_stpcpy(message,"Couldn't allocate memory");
 		return 1;
 	}
 	data->totalQuantity	= 0;
@@ -278,7 +278,7 @@ my_bool ssq_init(UDF_INIT* initid, UDF_ARGS* args, char* message)
 
 	if (!(data = (struct ssq_data*) malloc(sizeof(struct ssq_data))))
 	{
-		strmov(message,"Couldn't allocate memory");
+	        my_stpcpy(message,"Couldn't allocate memory");
 		return 1;
 	}
 	data->sumsq	= 0;

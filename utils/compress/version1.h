@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <stdint.h>
 
-namespace compress
+namespace icompress
 {
 	namespace v1
 	{

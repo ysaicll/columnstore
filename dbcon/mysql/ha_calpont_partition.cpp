@@ -95,7 +95,7 @@ void push_warnings(THD* thd, string& warnings)
 
 	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
 	{
-		push_warning(thd, Sql_condition::WARN_LEVEL_WARN, 9999, (*tok_iter).c_str());
+		push_warning(thd, Sql_condition::SL_WARNING, 9999, (*tok_iter).c_str());
 	}
 }
 
@@ -558,9 +558,9 @@ void partitionByValue_common(UDF_ARGS* args,								// input
 	}
 	else
 	{
-		if (current_thd->db)
+		if (current_thd->db().str)
 		{
-			schema = current_thd->db;
+			schema = current_thd->db().str;
 		}
 		else
 		{
@@ -584,7 +584,7 @@ void partitionByValue_common(UDF_ARGS* args,								// input
 
 	try
 	{
-		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id));
+		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id()));
 		csc->identity(execplan::CalpontSystemCatalog::FE);
 		CalpontSystemCatalog::TableColName tcn = make_tcn(schema, table, column);
 		csc->identity(CalpontSystemCatalog::FE);
@@ -791,7 +791,7 @@ std::string  ha_calpont_impl_markpartitions_(
 	qualifiedName->fSchema = tableName.schema;
 	qualifiedName->fName = tableName.table;
 	MarkPartitionStatement* stmt = new MarkPartitionStatement(qualifiedName);
-	stmt->fSessionID = tid2sid(current_thd->thread_id);
+	stmt->fSessionID = tid2sid(current_thd->thread_id());
 	stmt->fSql = "caldisablepartitions";
 	stmt->fOwner = tableName.schema;
 	stmt->fPartitions = partitionNums;
@@ -811,7 +811,7 @@ std::string  ha_calpont_impl_restorepartitions_(
 	qualifiedName->fSchema = tableName.schema;
 	qualifiedName->fName = tableName.table;
 	RestorePartitionStatement* stmt = new RestorePartitionStatement(qualifiedName);
-	stmt->fSessionID = tid2sid(current_thd->thread_id);
+	stmt->fSessionID = tid2sid(current_thd->thread_id());
 	stmt->fSql = "calenablepartitions";
 	stmt->fOwner = tableName.schema;
 	stmt->fPartitions = partitionNums;
@@ -832,7 +832,7 @@ std::string  ha_calpont_impl_droppartitions_(
 	qualifiedName->fSchema = tableName.schema;
 	qualifiedName->fName = tableName.table;
 	DropPartitionStatement* stmt = new DropPartitionStatement(qualifiedName);
-	stmt->fSessionID = tid2sid(current_thd->thread_id);
+	stmt->fSessionID = tid2sid(current_thd->thread_id());
 	stmt->fSql = "caldroppartitions";
 	stmt->fOwner = tableName.schema;
 	stmt->fPartitions = partitionNums;
@@ -916,9 +916,9 @@ const char* calshowpartitions(UDF_INIT* initid, UDF_ARGS* args,
 		}
 		else
 		{
-			if (current_thd->db)
+			if (current_thd->db().str)
 			{
-				schema = current_thd->db;
+				schema = current_thd->db().str;
 			}
 			else
 			{
@@ -928,7 +928,7 @@ const char* calshowpartitions(UDF_INIT* initid, UDF_ARGS* args,
 			column = (char*)(args->args[1]);
 		}
 
-		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id));
+		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id()));
 		csc->identity(CalpontSystemCatalog::FE);
 		CalpontSystemCatalog::TableColName tcn = make_tcn(schema, table, column);
 		OID_t oid = csc->lookupOID(tcn);
@@ -1112,14 +1112,14 @@ const char* caldisablepartitions(UDF_INIT* initid, UDF_ARGS* args,
 	else
 	{
 		tableName.table = args->args[0];
-		if (!current_thd->db)
+		if (!current_thd->db().str)
 		{
 			errMsg = "No schema name indicated.";
 			memcpy(result, errMsg.c_str(), errMsg.length());
 			*length = errMsg.length();
 			return result;
 		}
-		tableName.schema = current_thd->db;
+		tableName.schema = current_thd->db().str;
 		parsePartitionString(args, 1, partitionNums, errMsg, tableName);
 	}
 
@@ -1196,13 +1196,13 @@ const char* calenablepartitions(UDF_INIT* initid, UDF_ARGS* args,
 	else
 	{
 		tableName.table = args->args[0];
-		if (!current_thd->db)
+		if (!current_thd->db().str)
 		{
 			current_thd->get_stmt_da()->set_overwrite_status(true);
             current_thd->raise_error_printf(ER_INTERNAL_ERROR, IDBErrorInfo::instance()->errorMsg(ERR_PARTITION_NO_SCHEMA).c_str());
 			return result;
 		}
-		tableName.schema = current_thd->db;
+		tableName.schema = current_thd->db().str;
 		parsePartitionString(args, 1, partitionNums, errMsg, tableName);
 	}
 
@@ -1280,13 +1280,13 @@ const char* caldroppartitions(UDF_INIT* initid, UDF_ARGS* args,
 	else
 	{
 		tableName.table = args->args[0];
-		if (!current_thd->db)
+		if (!current_thd->db().str)
 		{
 			current_thd->get_stmt_da()->set_overwrite_status(true);
             current_thd->raise_error_printf(ER_INTERNAL_ERROR, IDBErrorInfo::instance()->errorMsg(ERR_PARTITION_NO_SCHEMA).c_str());
 			return result;
 		}
-		tableName.schema = current_thd->db;
+		tableName.schema = current_thd->db().str;
 		parsePartitionString(args, 1, partSet, errMsg, tableName);
 	}
 
@@ -1596,9 +1596,9 @@ const char* calshowpartitionsbyvalue(UDF_INIT* initid, UDF_ARGS* args,
 		}
 		else
 		{
-			if (current_thd->db)
+			if (current_thd->db().str)
 			{
-				schema = current_thd->db;
+				schema = current_thd->db().str;
 			}
 			else
 			{
@@ -1608,7 +1608,7 @@ const char* calshowpartitionsbyvalue(UDF_INIT* initid, UDF_ARGS* args,
 			column = (char*)(args->args[1]);
 		}
 
-		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id));
+		boost::shared_ptr<CalpontSystemCatalog> csc = CalpontSystemCatalog::makeCalpontSystemCatalog(tid2sid(current_thd->thread_id()));
 		csc->identity(CalpontSystemCatalog::FE);
 		CalpontSystemCatalog::TableColName tcn = make_tcn(schema, table, column);
 		OID_t oid = csc->lookupOID(tcn);
